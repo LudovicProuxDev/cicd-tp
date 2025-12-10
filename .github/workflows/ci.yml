@@ -37,9 +37,9 @@ jobs:
         if: always()
         uses: andgineer/allure-report@v3
         with:
+          gh_pages: gh-pages
+          allure_history: allure-history
           allure-results: build/allure-results
-          website: gh-pages
-          reports-site-path: allure-report
 
       # Publie directement sur GitHub Pages
       - name: Publish test report to GitHub Pages
@@ -48,4 +48,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-report
+          publish_dir: allure-history
