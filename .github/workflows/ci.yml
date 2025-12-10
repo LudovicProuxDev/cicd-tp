@@ -24,6 +24,9 @@ jobs:
       - name: Lint project
         run: npm run lint
 
+      - name: Ensure Allure results folder exists
+        run: mkdir -p build/allure-results
+
       - name: Load test report history
         uses: actions/checkout@v3
         if: always()
