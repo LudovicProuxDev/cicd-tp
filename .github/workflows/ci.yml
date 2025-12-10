@@ -1,61 +1,43 @@
 # .github/workflows/ci.yml
 name: CI
-
 on:
-  push:
+  push: # Déclenchement à chaque push/merge
     branches:
-      - master # déclenche seulement sur la branche master
-
+      - master # sur la branche `master' uniquement
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
+  deploy: # Nom du premier job
+    runs-on: ubuntu-latest # macos, windows…
     steps:
-      # 1. Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      # 2. Setup Node
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc"
-
-      # 3. Install dependencies
+          node-version-file: ".nvmrc" # Contient "v22.19.0"
       - name: Install dependencies
         run: npm ci
-
-      # 4. Run tests
       - name: Test project
         run: npm test
-
-      # 5. Lint project
       - name: Lint project
         run: npm run lint
-
-      # 6. Charger l’historique des rapports depuis gh-pages
-      - name: Checkout gh-pages (history)
-        uses: actions/checkout@v5
+      - name: Load test report history
+        uses: actions/checkout@v3
         if: always()
         continue-on-error: true
         with:
           ref: gh-pages
-          path: gh-pages-dir
+          path: gh-pages
 
-      # 7. Générer le rapport Allure
-      - name: Generate Allure report
-        uses: andgineer/allure-report@v3
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
         if: always()
         with:
-          allure-results: build/allure-results
-          website: gh-pages-dir
-          reports-site-path: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: build/allure-results
 
-      # 8. Publier sur GitHub Pages
-      - name: Publish to gh-pages
+      - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: gh-pages-dir
+          publish_dir: allure-history
