@@ -1,29 +1,29 @@
+# .github/workflows/ci.yml
 name: CI
 on:
-  push:
+  push: # Déclenchement à chaque push/merge
     branches:
-      - master
+      - master # sur la branche `master' uniquement
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  deploy: # Nom du premier job
+    runs-on: ubuntu-latest # macos, windows…
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: ".nvmrc" # Contient "v22.19.0"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Test project
         run: npm test
 
       - name: Lint project
         run: npm run lint
 
-      # Charge l'historique Allure depuis la branche gh-pages
       - name: Load test report history
         uses: actions/checkout@v3
         if: always()
@@ -32,19 +32,17 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # Génère le rapport Allure
-      - name: Generate Allure report
-        if: always()
+      - name: Build test report
         uses: andgineer/allure-report@v3
+        if: always()
         with:
           gh_pages: gh-pages
           allure_history: allure-history
-          allure-results: build/allure-results
+          allure_results: build/allure-results
 
-      # Publie directement sur GitHub Pages
-      - name: Publish test report to GitHub Pages
-        if: always()
+      - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
+        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
