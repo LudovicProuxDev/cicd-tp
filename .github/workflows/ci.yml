@@ -1,38 +1,58 @@
 # .github/workflows/ci.yml
 name: CI
+
 on:
-  push: # Déclenchement à chaque push/merge
+  push:
     branches:
-      - master # sur la branche `master' uniquement
+      - master # déclenche seulement sur la branche master
+
 jobs:
-  deploy: # Nom du premier job
-    runs-on: ubuntu-latest # macos, windows…
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      # 2. Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc" # Contient "v22.19.0"
+          node-version-file: ".nvmrc"
+
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
+
+      # 4. Run tests
       - name: Test project
         run: npm test
+
+      # 5. Lint project
       - name: Lint project
         run: npm run lint
+
+      # 6. Charger l’historique des rapports depuis gh-pages
       - name: Load test report history
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         if: always()
         continue-on-error: true
         with:
           ref: gh-pages
-          path: gh-pages
-      - name: Build test report
-        uses: simple-elf/allure-report-action@v1.7
+          path: allure-history
+
+      # 7. Générer le rapport Allure
+      - name: Build Allure report
+        uses: allure-framework/allure-report-action@v2
         if: always()
         with:
-          gh_pages: gh-pages
-          allure_history: allure-history
           allure_results: build/allure-results
-      - name: Publish test report
+          allure_history: allure-history
+          keep_history: true
+
+      # 8. Publier sur GitHub Pages
+      - name: Publish Allure report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
