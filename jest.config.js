@@ -3,7 +3,7 @@ module.exports = {
   reporters: [
     "default",
     ["jest-allure2-reporter", {
-      resultsDir: "build/allure-results"
+      resultsDir: "allure-results"
     }]
   ]
 };
