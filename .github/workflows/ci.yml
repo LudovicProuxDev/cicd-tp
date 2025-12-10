@@ -33,9 +33,7 @@ jobs:
           path: gh-pages
 
       - name: Prepare Allure results
-        run: |
-          mkdir -p allure-results
-          cp -r build/allure-results/* allure-results/
+        run: mkdir -p allure-results
 
       - name: Build test report
         uses: andgineer/allure-report@v3
